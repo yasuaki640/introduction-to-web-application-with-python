@@ -132,3 +132,4 @@ dmypy.json
 .idea/
 
 server_recv.txt
+client_recv.txt
