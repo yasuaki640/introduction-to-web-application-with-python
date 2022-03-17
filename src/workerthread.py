@@ -21,6 +21,12 @@ class WorkerThread(Thread):
         "gif": "image/gif",
     }
 
+    URL_VIEW = {
+        "/now": views.now,
+        "/show_request": views.show_request,
+        "/parameters": views.parameters,
+    }
+
     def __init__(self, client_socket: socket, address: Tuple[str, int]):
         super().__init__()
 
@@ -45,16 +51,11 @@ class WorkerThread(Thread):
             content_type: Optional[str]
             response_line: str
 
-            if path == "/now":
-                response_body, content_type, response_line = views.now()
-
-            elif path == "/show_request":
-                response_body, content_type, response_line = views.show_request(
+            if path in self.URL_VIEW:
+                view = self.URL_VIEW[path]
+                response_body, content_type, response_line = view(
                     method, path, http_version, request_header, request_body
                 )
-
-            elif path == "/parameters":
-                response_body, content_type, response_line = views.parameters(method, request_body)
 
             else:
                 try:

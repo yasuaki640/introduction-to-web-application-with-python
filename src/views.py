@@ -5,7 +5,13 @@ from pprint import pformat
 from typing import Tuple, Optional
 
 
-def now() -> Tuple[bytes, Optional[str], str]:
+def now(
+        method: str,
+        path: str,
+        http_version: str,
+        request_header: dict,
+        request_body: bytes,
+) -> Tuple[bytes, Optional[str], str]:
     """
     現在時刻を表示するHTMLを生成する
     """
@@ -61,13 +67,15 @@ def show_request(
 
 def parameters(
         method: str,
+        path: str,
+        http_version: str,
+        request_header: dict,
         request_body: bytes,
 ) -> Tuple[bytes, Optional[str], str]:
     """
     POSTパラメータを表示するHTMLを表示する
     """
 
-    # GETリクエストの場合は、405を返す
     if method == "GET":
         response_body = b"<html><body><h1>405 Method Not Allowed</h1></body></html>"
         content_type = "text/html; charset=UTF-8"
