@@ -9,6 +9,7 @@ from typing import Tuple
 import views
 from henago.http.request import HTTPRequest
 from henago.http.response import HTTPResponse
+from urls import URL_VIEW
 
 
 class WorkerThread(Thread):
@@ -21,12 +22,6 @@ class WorkerThread(Thread):
         "png": "image/png",
         "jpg": "image/jpg",
         "gif": "image/gif",
-    }
-
-    URL_VIEW = {
-        "/now": views.now,
-        "/show_request": views.show_request,
-        "/parameters": views.parameters,
     }
 
     STATUS_LINES = {
@@ -46,7 +41,6 @@ class WorkerThread(Thread):
         クライアントと接続済みのsocketを引数として受け取り、
         リクエストを処理してレスポンスを送信する
         """
-
         try:
             request_bytes = self.client_socket.recv(4096)
 
@@ -55,8 +49,8 @@ class WorkerThread(Thread):
 
             request = self.parse_http_request(request_bytes)
 
-            if request.path in self.URL_VIEW:
-                view = self.URL_VIEW[request.path]
+            if request.path in URL_VIEW:
+                view = URL_VIEW[request.path]
                 response = view(request)
 
             else:
@@ -92,7 +86,6 @@ class WorkerThread(Thread):
         """
         生のHTTPリクエストを、HTTPRequestクラスへ変換する
         """
-
         request_line, remain = request.split(b"\r\n", maxsplit=1)
         request_header, request_body = remain.split(b"\r\n\r\n", maxsplit=1)
 
@@ -109,7 +102,6 @@ class WorkerThread(Thread):
         """
         リクエストpathから、staticファイルの内容を取得する
         """
-
         relative_path = path.lstrip("/")
 
         static_file_path = os.path.join(self.STATIC_ROOT, relative_path)

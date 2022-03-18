@@ -53,8 +53,6 @@ def parameters(request: HTTPRequest) -> HTTPResponse:
     """
     POSTパラメータを表示するHTMLを表示する
     """
-
-    # GETリクエストの場合は、405を返す
     if request.method == "GET":
         body = b"<html><body><h1>405 Method Not Allowed</h1></body></html>"
         content_type = "text/html; charset=UTF-8"
