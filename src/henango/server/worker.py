@@ -6,13 +6,13 @@ from socket import socket
 from threading import Thread
 from typing import Tuple
 
-import views
-from henago.http.request import HTTPRequest
-from henago.http.response import HTTPResponse
+import settings
+from henango.http.request import HTTPRequest
+from henango.http.response import HTTPResponse
 from urls import URL_VIEW
 
 
-class WorkerThread(Thread):
+class Worker(Thread):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
@@ -41,7 +41,9 @@ class WorkerThread(Thread):
         クライアントと接続済みのsocketを引数として受け取り、
         リクエストを処理してレスポンスを送信する
         """
+
         try:
+
             request_bytes = self.client_socket.recv(4096)
 
             with open("server_recv.txt", "wb") as f:
@@ -102,9 +104,11 @@ class WorkerThread(Thread):
         """
         リクエストpathから、staticファイルの内容を取得する
         """
-        relative_path = path.lstrip("/")
+        default_static_root = os.path.join(os.path.dirname(__file__), "../../static")
+        static_root = getattr(settings, "STATIC_ROOT", default_static_root)
 
-        static_file_path = os.path.join(self.STATIC_ROOT, relative_path)
+        relative_path = path.lstrip("/")
+        static_file_path = os.path.join(static_root, relative_path)
 
         with open(static_file_path, "rb") as f:
             return f.read()

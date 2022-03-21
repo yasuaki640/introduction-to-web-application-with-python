@@ -1,9 +1,9 @@
 import socket
 
-from workerthread import WorkerThread
+from henango.server.worker import Worker
 
 
-class WebServer:
+class Server:
     """
     Webサーバーを表すクラス
     """
@@ -23,7 +23,8 @@ class WebServer:
                 (client_socket, address) = server_socket.accept()
                 print(f"=== Server: クライアントとの接続が完了しました remote_address: {address} ===")
 
-                WorkerThread(client_socket, address).start()
+                thread = Worker(client_socket, address)
+                thread.start()
 
         finally:
             print("=== Server: サーバーを停止します。 ===")
@@ -33,15 +34,9 @@ class WebServer:
         通信を待ち受けるためのserver_socketを生成する
         :return:
         """
-
         server_socket = socket.socket()
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         server_socket.bind((socket.gethostname(), 8080))
         server_socket.listen(10)
         return server_socket
-
-
-if __name__ == "__main__":
-    server = WebServer()
-    server.serve()
