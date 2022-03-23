@@ -2,9 +2,10 @@ import os
 import re
 import traceback
 from datetime import datetime
+from re import Match
 from socket import socket
 from threading import Thread
-from typing import Tuple
+from typing import Tuple, Optional
 
 import settings
 from henango.http.request import HTTPRequest
@@ -13,9 +14,6 @@ from urls import URL_VIEW
 
 
 class Worker(Thread):
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
     MIME_TYPES = {
         "html": "text/html; charset=UTF-8",
         "css": "text/css",
@@ -41,9 +39,7 @@ class Worker(Thread):
         クライアントと接続済みのsocketを引数として受け取り、
         リクエストを処理してレスポンスを送信する
         """
-
         try:
-
             request_bytes = self.client_socket.recv(4096)
 
             with open("server_recv.txt", "wb") as f:
@@ -51,9 +47,12 @@ class Worker(Thread):
 
             request = self.parse_http_request(request_bytes)
 
-            if request.path in URL_VIEW:
-                view = URL_VIEW[request.path]
-                response = view(request)
+            for url_pattern, view in URL_VIEW.items():
+                match = self.url_match(url_pattern, request.path)
+                if match:
+                    request.params.update(match.groupdict())
+                    response = view(request)
+                    break
 
             else:
                 try:
@@ -140,3 +139,7 @@ class Worker(Thread):
         response_header += f"Content-Type: {response.content_type}\r\n"
 
         return response_header
+
+    def url_match(self, url_pattern: str, path: str) -> Optional[Match]:
+        re_pattern = re.sub(r"<(.+?)>", r"(?P<\1>[^/]+)", url_pattern)
+        return re.match(re_pattern, path)
