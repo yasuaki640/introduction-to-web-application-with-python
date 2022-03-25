@@ -9,7 +9,7 @@ from typing import Tuple
 import settings
 from henango.http.request import HTTPRequest
 from henango.http.response import HTTPResponse
-from urls import url_patterns
+from henango.urls.resolver import URLResolver
 
 
 class Worker(Thread):
@@ -46,14 +46,10 @@ class Worker(Thread):
 
             request = self.parse_http_request(request_bytes)
 
-            for url_pattern in url_patterns:
-                match = url_pattern.match(request.path)
-                if match:
-                    request.params.update(match.groupdict())
-                    view = url_pattern.view
-                    response = view(request)
-                    break
+            view = URLResolver().resolve(request)
 
+            if view:
+                response = view(request)
             else:
                 try:
                     response_body = self.get_static_file_content(request.path)
