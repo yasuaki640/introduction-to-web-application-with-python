@@ -1,4 +1,3 @@
-import os
 import re
 import traceback
 from datetime import datetime
@@ -6,7 +5,6 @@ from socket import socket
 from threading import Thread
 from typing import Tuple
 
-import settings
 from henango.http.request import HTTPRequest
 from henango.http.response import HTTPResponse
 from henango.urls.resolver import URLResolver
@@ -48,20 +46,7 @@ class Worker(Thread):
 
             view = URLResolver().resolve(request)
 
-            if view:
-                response = view(request)
-            else:
-                try:
-                    response_body = self.get_static_file_content(request.path)
-                    content_type = None
-                    response = HTTPResponse(body=response_body, content_type=content_type, status_code=200)
-
-                except OSError:
-                    traceback.print_exc()
-
-                    response_body = b"<html><body><h1>404 Not Found</h1></body></html>"
-                    content_type = "text/html;"
-                    response = HTTPResponse(body=response_body, content_type=content_type, status_code=404)
+            response = view(request)
 
             response_line = self.build_response_line(response)
 
@@ -94,19 +79,6 @@ class Worker(Thread):
             headers[key] = value
 
         return HTTPRequest(method=method, path=path, http_version=http_version, headers=headers, body=request_body)
-
-    def get_static_file_content(self, path: str) -> bytes:
-        """
-        リクエストpathから、staticファイルの内容を取得する
-        """
-        default_static_root = os.path.join(os.path.dirname(__file__), "../../static")
-        static_root = getattr(settings, "STATIC_ROOT", default_static_root)
-
-        relative_path = path.lstrip("/")
-        static_file_path = os.path.join(static_root, relative_path)
-
-        with open(static_file_path, "rb") as f:
-            return f.read()
 
     def build_response_line(self, response: HTTPResponse) -> str:
         """
