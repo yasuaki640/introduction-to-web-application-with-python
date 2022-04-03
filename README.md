@@ -1,7 +1,11 @@
 # introduction-to-web-application-with-python
-https://zenn.dev/bigen1925/books/introduction-to-web-application-with-python
 
-## Note to myself
+This repository is a Dockerized version of [this book's](https://zenn.dev/bigen1925/books/introduction-to-web-application-with-python) completed entire code.
+
+## How to run
 ```shell
-docker compose run web /bin/bash
+docker compose up -d
+
+# in web container
+python start.py
 ```
