@@ -95,10 +95,9 @@ class Worker(Thread):
         if response.content_type is None:
             if "." in request.path:
                 ext = request.path.rsplit(".", maxsplit=1)[-1]
+                response.content_type = self.MIME_TYPES.get(ext, "application/octet-stream")
             else:
-                ext = ""
-
-            response.content_type = self.MIME_TYPES.get(ext, "application/octet-stream")
+                response.content_type = "text/html; charset=UTF-8"
 
         response_header = ""
         response_header += f"Date: {datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')}\r\n"
